@@ -40,8 +40,8 @@ export const retrieveAdminDashboardSliceApi = apiSlice.injectEndpoints({
       }),
     }),
     getValuationFirmsRequestList: builder.query({
-      query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => ({
-        url: `/api/admin/get-valuation-access-requests?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
+      query: ({ currentPage=0, rowsPerPage=10, searchText, orderColumn, sortOrder }) => ({
+        url: `/api/admin/access-requests/valuers?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
         method: "GET",
         headers: {
           Accept: "Application/json",
@@ -49,8 +49,8 @@ export const retrieveAdminDashboardSliceApi = apiSlice.injectEndpoints({
       }),
     }),
     getLendersRequestList: builder.query({
-      query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => ({
-        url: `/api/admin/get-accesor-access-requests?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
+      query: ({ currentPage=0, rowsPerPage=10, searchText, orderColumn, sortOrder }) => ({
+        url: `/api/admin/access-requests/valuers?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
         method: "GET",
         headers: {
           Accept: "Application/json",

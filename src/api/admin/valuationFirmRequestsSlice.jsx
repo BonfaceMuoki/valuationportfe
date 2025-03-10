@@ -3,14 +3,23 @@ export const valuationFirmRequestsSlliceApi = apiSlice.injectEndpoints({
 
     endpoints: builder => ({
         getValuationFirmRequests: builder.query({
-            query: () => ({
-                url: `/api/admin/get-valuation-access-requests`,
+            query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => ({
+                url: `/api/admin/access-requests/valuers?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
                 method: 'GET',
                 headers: {
                     'Accept': 'Application/json'
                 }
-            })
-
+            }),
+            async onQueryStarted(args, { queryFulfilled }) {
+                console.log("Request started with args:", args);
+        
+                try {
+                    const response = await queryFulfilled;
+                    console.log("Request successful:", response.data);
+                } catch (error) {
+                    console.error("Request failed:", error);
+                }
+            }
         }),
         approveValuationFirmRequest: builder.mutation({
             query: (formdata) => ({

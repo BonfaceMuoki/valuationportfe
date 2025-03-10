@@ -89,41 +89,37 @@ const ValuerAccessInvites = () => {
   const [modalOpenCompanyDetails, setModaOpenCompanyDetails] = useState(false);
   const toggleOpenCompanyDetails = () => setModaOpenCompanyDetails(!modalOpenCompanyDetails);
 
-  const [currentItems, setcurrentItems] = useState([]);
-  const [tableData, setTableData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemPerPage, setItemPerPage] = useState(3);
+
   const {
-    data: firms,
+    data,
     isFetching,
     isLoading,
     refetch: refetchFirmRequests,
     isSuccess,
     isError,
     error,
-  } = useGetValuationFirmRequestsQuery();
-  console.log(firms);
+  } = useGetValuationFirmRequestsQuery({
+    currentPage: currentPage,
+    rowsPerPage: itemPerPage,
+    searchText: "",
+    orderColumn: "name",
+    sortOrder: "asc",
+  });
 
   useEffect(() => {
-    if (firms != null) {
-      setTableData(firms);
-    } else {
-      setTableData([{}]);
+    if (data?.requests) {
+      setCurrentPage(data.requests.current_page);
+      setItemPerPage(data.requests.per_page);
     }
-  }, [firms]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage, setItemPerPage] = useState(10);
-
-  useEffect(() => {
-    if (tableData != null) {
-      const indexOfLastItem = currentPage * itemPerPage;
-      const indexOfFirstItem = indexOfLastItem - itemPerPage;
-      setcurrentItems(tableData?.slice(indexOfFirstItem, indexOfLastItem));
-    }
-  }, [tableData]);
-
-  // const currentItems = ;
+  }, [data]);
 
   // Change Page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   //actions
   const [acceptValuationAccessRequest, { isLoading: sendingUploaderInvite }] = useApproveValuationFirmRequestMutation();
   const [rejectValuationFirmRequest, { isloading: sendingReject }] = useRejectValuationFirmRequestMutation();
@@ -131,10 +127,10 @@ const ValuerAccessInvites = () => {
     console.log("Aproving");
     Swal.fire({
       title: "Are you sure?",
-      text: "You want to approve " + firm?.valauaion_firm_name + "?",
+      text: "You want to approve " + firm?.valuationFirmName + "?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Yes, Approve!",
     }).then((result) => {
       if (result.isConfirmed) {
         acceptAcceptingRegistartion(firm?.id);
@@ -227,9 +223,7 @@ const ValuerAccessInvites = () => {
     resolver: yupResolver(schema),
   });
 
-  if (tableData.length > 0) {
-    console.log("Table Data");
-    console.log(tableData);
+  if (data?.requests?.data) {
     return (
       <PreviewCard>
         {/* open modal decline */}
@@ -301,164 +295,162 @@ const ValuerAccessInvites = () => {
               </DataTableRow>
             </DataTableHead>
             {/*Head*/}
-            {currentItems != undefined &&
-              currentItems != null &&
-              currentItems.map((item, index) => {
-                return (
-                  <DataTableItem key="valuer-access-reqs-${item.id}">
-                    <DataTableRow>
-                      <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}>
-                        <div className="user-card">
-                          <UserAvatar
-                            theme={item.avatarBg}
-                            text={findUpper(
-                              item.valauaion_firm_name != null && item.valauaion_firm_name != undefined
-                                ? item.valauaion_firm_name
-                                : ""
-                            )}
-                            image=""
-                          ></UserAvatar>
-                          <div className="user-info">
-                            <span className="tb-lead">
-                              {item?.valauaion_firm_name}{" "}
-                              <span
-                                className={`dot dot-${
-                                  item.status === "Active"
-                                    ? "success"
-                                    : item?.status === "Pending"
-                                    ? "warning"
-                                    : "danger"
-                                } d-md-none ms-1`}
-                              ></span>
-                            </span>
-                            <span>{item?.invite_email}</span>
-                          </div>
+            {data.requests.data.map((item, index) => {
+              return (
+                <DataTableItem key={`valuer-access-reqs-${item.id}`}>
+                  <DataTableRow>
+                    {/* <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}> */}
+                      <div className="user-card">
+                        <UserAvatar
+                          theme={item.avatarBg}
+                          text={findUpper(
+                            item.valuationFirmName != null && item.valuationFirmName != undefined
+                              ? item.valuationFirmName
+                              : ""
+                          )}
+                          image=""
+                        ></UserAvatar>
+                        <div className="user-info">
+                          <span className="tb-lead">
+                            {item?.valuationFirmName}{" "}
+                            <span
+                              className={`dot dot-${
+                                item.status === "Active"
+                                  ? "success"
+                                  : item?.status === "Pending"
+                                  ? "warning"
+                                  : "danger"
+                              } d-md-none ms-1`}
+                            ></span>
+                          </span>
+                          <span>{item?.inviteEmail}</span>
                         </div>
-                      </Link>
-                    </DataTableRow>
-                    <DataTableRow>
-                      <span className="tb-amount">
-                        <span className="tb-lead">
-                          {" "}
-                          <b>Dir Name</b> &nbsp;&nbsp;&nbsp; <span>{item?.director_name}</span>{" "}
-                        </span>
+                      </div>
+                    {/* </Link> */}
+                  </DataTableRow>
+                  <DataTableRow>
+                    <span className="tb-amount">
+                      <span className="tb-lead">
+                        {" "}
+                        <b>Dir Name</b> &nbsp;&nbsp;&nbsp; <span>{item?.directorName}</span>{" "}
                       </span>
-                      <span className="tb-amount">
-                        <span className="tb-lead">
-                          {" "}
-                          <b>ISK Number</b>:&nbsp;&nbsp;&nbsp; <span>{item?.isk_number}</span>{" "}
-                        </span>
+                    </span>
+                    <span className="tb-amount">
+                      <span className="tb-lead">
+                        {" "}
+                        <b>ISK Number</b>:&nbsp;&nbsp;&nbsp; <span>{item?.iskNumber}</span>{" "}
                       </span>
-                      <span className="tb-amount">
-                        <span className="tb-lead">
-                          {" "}
-                          <b>VRB Number</b>&nbsp;&nbsp;&nbsp; <span>{item?.vrb_number}</span>{" "}
-                        </span>
+                    </span>
+                    <span className="tb-amount">
+                      <span className="tb-lead">
+                        {" "}
+                        <b>VRB Number</b>&nbsp;&nbsp;&nbsp; <span>{item?.vrbNumber}</span>{" "}
                       </span>
-                    </DataTableRow>
-                    <DataTableRow className="nk-tb-col-tools">
-                      <ul className="nk-tb-actions gx-1">
-                        <li>
-                          <UncontrolledDropdown>
-                            <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
-                              <Icon name="more-h"></Icon>
-                            </DropdownToggle>
-                            <DropdownMenu end>
-                              <ul className="link-list-opt no-bdr">
-                                {item?.status === "Requested" && (
-                                  <React.Fragment>
-                                    <li onClick={() => acceptRequest(item)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#edit"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="check"></Icon>
-                                        <span>Approve</span>
-                                      </DropdownItem>
-                                    </li>
-                                    <li className="divider"></li>
-                                    <li onClick={() => declineRequest(item)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#suspend"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="cross"></Icon>
-                                        <span>Decline</span>
-                                      </DropdownItem>
-                                    </li>
-                                  </React.Fragment>
-                                )}
-                                {item?.status === "Approved" && (
-                                  <React.Fragment>
-                                    <li onClick={() => viewRegistrationStatus(item)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#edit"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="check"></Icon>
-                                        <span>View Registration Status</span>
-                                      </DropdownItem>
-                                    </li>
-                                  </React.Fragment>
-                                )}
-                                {item?.status === "Rejected" && (
-                                  <React.Fragment>
-                                    <li onClick={() => archiveRequest(item)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#edit"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="check"></Icon>
-                                        <span>Archive Request</span>
-                                      </DropdownItem>
-                                    </li>
-                                  </React.Fragment>
-                                )}
-                                {item?.status === "Registered" && (
-                                  <React.Fragment>
-                                    <li onClick={() => viewRegistrationStatus(item)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#edit"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="check"></Icon>
-                                        <span>View Company Details</span>
-                                      </DropdownItem>
-                                    </li>
-                                  </React.Fragment>
-                                )}
-                              </ul>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </li>
-                      </ul>
-                    </DataTableRow>
-                  </DataTableItem>
-                );
-              })}
+                    </span>
+                  </DataTableRow>
+                  <DataTableRow className="nk-tb-col-tools">
+                    <ul className="nk-tb-actions gx-1">
+                      <li>
+                        <UncontrolledDropdown>
+                          <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
+                            <Icon name="more-h"></Icon>
+                          </DropdownToggle>
+                          <DropdownMenu end>
+                            <ul className="link-list-opt no-bdr">
+                              {item?.approvalStatus === "PENDING" && (
+                                <React.Fragment>
+                                  <li onClick={() => acceptRequest(item)}>
+                                    <DropdownItem
+                                      tag="a"
+                                      href="#edit"
+                                      onClick={(ev) => {
+                                        ev.preventDefault();
+                                      }}
+                                    >
+                                      <Icon name="check"></Icon>
+                                      <span>Approve</span>
+                                    </DropdownItem>
+                                  </li>
+                                  <li className="divider"></li>
+                                  <li onClick={() => declineRequest(item)}>
+                                    <DropdownItem
+                                      tag="a"
+                                      href="#suspend"
+                                      onClick={(ev) => {
+                                        ev.preventDefault();
+                                      }}
+                                    >
+                                      <Icon name="cross"></Icon>
+                                      <span>Decline</span>
+                                    </DropdownItem>
+                                  </li>
+                                </React.Fragment>
+                              )}
+                              {item?.status === "Approved" && (
+                                <React.Fragment>
+                                  <li onClick={() => viewRegistrationStatus(item)}>
+                                    <DropdownItem
+                                      tag="a"
+                                      href="#edit"
+                                      onClick={(ev) => {
+                                        ev.preventDefault();
+                                      }}
+                                    >
+                                      <Icon name="check"></Icon>
+                                      <span>View Registration Status</span>
+                                    </DropdownItem>
+                                  </li>
+                                </React.Fragment>
+                              )}
+                              {item?.status === "Rejected" && (
+                                <React.Fragment>
+                                  <li onClick={() => archiveRequest(item)}>
+                                    <DropdownItem
+                                      tag="a"
+                                      href="#edit"
+                                      onClick={(ev) => {
+                                        ev.preventDefault();
+                                      }}
+                                    >
+                                      <Icon name="check"></Icon>
+                                      <span>Archive Request</span>
+                                    </DropdownItem>
+                                  </li>
+                                </React.Fragment>
+                              )}
+                              {item?.status === "Registered" && (
+                                <React.Fragment>
+                                  <li onClick={() => viewRegistrationStatus(item)}>
+                                    <DropdownItem
+                                      tag="a"
+                                      href="#edit"
+                                      onClick={(ev) => {
+                                        ev.preventDefault();
+                                      }}
+                                    >
+                                      <Icon name="check"></Icon>
+                                      <span>View Company Details</span>
+                                    </DropdownItem>
+                                  </li>
+                                </React.Fragment>
+                              )}
+                            </ul>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
+                      </li>
+                    </ul>
+                  </DataTableRow>
+                </DataTableItem>
+              );
+            })}
           </DataTableBody>
           <div className="card-inner">
-            {currentItems != null && currentItems != undefined ? (
+            {data.requests.data.length > 0 ? (
               <PaginationComponent
-                itemPerPage={itemPerPage}
-                totalItems={tableData?.length}
+                itemPerPage={data.requests.per_page}
+                totalItems={data.requests.total}
                 paginate={paginate}
-                currentPage={currentPage}
+                currentPage={data.requests.current_page}
               />
             ) : (
               <div className="text-center">

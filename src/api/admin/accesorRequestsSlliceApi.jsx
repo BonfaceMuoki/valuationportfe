@@ -2,8 +2,8 @@ import { apiSlice } from "../../featuers/apiSlice"
 export const accesorRequestsSlliceApi = apiSlice.injectEndpoints({   
     endpoints: builder => ({
         getAccesorRequests: builder.query({
-            query: () => ({
-                url: `/api/admin/get-accesor-access-requests`,
+            query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => ({
+                url: `/api/admin/access-requests/valuers?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
                 method: 'GET',
                 headers: {
                     'Accept': 'Application/json'
