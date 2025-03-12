@@ -74,8 +74,8 @@ const AcceptInviteSignup = () => {
       .string()
       .oneOf([yup.ref("password"), null], "Passwords do not match.")
       .required("Please confirm the password"),
-    latitude: yup.number().required('Please select a location on the map'),
-    longitude: yup.number().required('Please select a location on the map'),
+    // latitude: yup.number().required('Please select a location on the map'),
+    // longitude: yup.number().required('Please select a location on the map'),
   });
 
   const {
@@ -87,16 +87,15 @@ const AcceptInviteSignup = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
-
-  useEffect(() => {
+ useEffect(() => {
     if (!loadingInviteDetails && retrieved) {
-      console.log(retrieved);
-      setInviteValue("company_name", retrieved?.valauaion_firm_name);
-      setInviteValue("full_name", retrieved?.director_name);
-      setInviteValue("email", retrieved?.invite_email);
-      setInviteValue("vrb_number", retrieved?.vrb_number);
-      setInviteValue("isk_number", retrieved?.isk_number);
-      setInviteValue("phone_number", retrieved?.invite_phone);
+      console.log(retrieved?.details);
+      setInviteValue("company_name", retrieved?.details?.valuationFirmName);
+      setInviteValue("full_name", retrieved?.details?.directorName);
+      setInviteValue("email", retrieved?.details?.inviteEmail);
+      setInviteValue("vrb_number", retrieved?.details?.vrbNumber);
+      setInviteValue("isk_number", retrieved?.details?.iskNumber);
+      setInviteValue("phone_number", retrieved?.details?.invitePhone);
     }
   }, [retrieved, loadingInviteDetails, setInviteValue]);
   const navigate = useNavigate();
@@ -130,16 +129,18 @@ const AcceptInviteSignup = () => {
   return (
     <>
       <Head title="Register" />
-      <Block className="nk-block-middle nk-auth-body  wide-xs">
+      <Block className="nk-block-middle nk-auth-body  wide-lg">
         <PreviewCard className="card-bordered" bodyClass="card-inner-lg">
           <BlockHead>
             <BlockContent>
-              <BlockTitle tag="h4">Valuer Access Request</BlockTitle>
+              <BlockTitle tag="h4">Valuation Firm Registration </BlockTitle>
             </BlockContent>
           </BlockHead>
 
           <form onSubmit={handleSubmitRegisterValuer(submitRegister)}>
-            <div className="form-group">
+          <Row>
+          <Col>
+          <div className="form-group">
               <div className="form-label-group">
                 <label className="form-label" htmlFor="default-01">
                   Director of Valuation Full Names
@@ -160,7 +161,11 @@ const AcceptInviteSignup = () => {
                 )}
               </div>
             </div>
-            <div className="form-group">
+          </Col>
+          <Col>
+
+
+          <div className="form-group">
               <div className="form-label-group">
                 <label className="form-label" htmlFor="default-01">
                   Account Login Email
@@ -181,7 +186,12 @@ const AcceptInviteSignup = () => {
                 )}
               </div>
             </div>
-            <div className="form-group">
+          </Col>
+          </Row>
+          <Row>
+          <Col>
+
+          <div className="form-group">
               <div className="form-label-group">
                 <label className="form-label" htmlFor="default-01">
                   Company Name
@@ -202,6 +212,33 @@ const AcceptInviteSignup = () => {
                 )}
               </div>
             </div>
+          </Col>
+          <Col>
+
+          <div className="form-group">
+              <div className="form-label-group">
+                <label className="form-label" htmlFor="default-01">
+                  Contact Phone Number
+                </label>
+              </div>
+              <div className="form-control-wrap">
+                <input
+                  type="text"
+                  readOnly
+                  id="default-01"
+                  {...acceptInviteRegister("phone_number", { required: "This field is required" })}
+                  defaultValue=""
+                  placeholder="Enter your email address"
+                  className="form-control-lg form-control"
+                />
+                {acceptInviteerrors.phone_number?.message && (
+                  <span className="invalid">{acceptInviteerrors.phone_number?.message}</span>
+                )}
+              </div>
+            </div>
+          </Col>
+          </Row>
+  
 
             <Row>
               <Col>
@@ -254,27 +291,6 @@ const AcceptInviteSignup = () => {
               </Col>
             </Row>
 
-            <div className="form-group">
-              <div className="form-label-group">
-                <label className="form-label" htmlFor="default-01">
-                  Contact Phone Number
-                </label>
-              </div>
-              <div className="form-control-wrap">
-                <input
-                  type="text"
-                  readOnly
-                  id="default-01"
-                  {...acceptInviteRegister("phone_number", { required: "This field is required" })}
-                  defaultValue=""
-                  placeholder="Enter your email address"
-                  className="form-control-lg form-control"
-                />
-                {acceptInviteerrors.phone_number?.message && (
-                  <span className="invalid">{acceptInviteerrors.phone_number?.message}</span>
-                )}
-              </div>
-            </div>
             <Row className="mb-3">
               <Col>
                 <div className="form-group">
@@ -358,8 +374,8 @@ const AcceptInviteSignup = () => {
                     />
                   )}
                 </Map>
-                {acceptInviteerrors.latitude?.message && (
-                  <span className="invalid">{acceptInviteerrors.latitude?.message}</span>
+                {(acceptInviteerrors.latitude?.message || acceptInviteerrors.longitude?.message) && (
+                  <span className="invalid">Please select your office location on the map</span>
                 )}
               </div>
             </div>

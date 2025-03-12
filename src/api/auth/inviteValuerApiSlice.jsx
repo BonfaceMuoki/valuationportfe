@@ -36,7 +36,7 @@ export const inviteValuerApiSlice = apiSlice.injectEndpoints({
         }),
         getValuerInviteDetails: builder.query({
             query: (invite_token) => ({
-                url: `/api/auth/retrieve-valuer-invite-details?invite_token=${invite_token}`,
+                url: `/api/auth/access-requests/valuer/get-invite-details?inviteToken=${invite_token}`,
                 method: 'GET',
                 headers: {
                     'Accept': 'Application/json'
