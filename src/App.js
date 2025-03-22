@@ -43,7 +43,7 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/request-valuer-access" element={<RequestValuerAccesor />} />
               <Route path="/request-accesor-access" element={<RequestAccesorAccess />} />
-              <Route path="/complete-accesor-invite-by-registering" element={<AcceptAccesorInviteSignup />} />
+              <Route path="/complete-consumer-invite-by-registering" element={<AcceptAccesorInviteSignup />} />
               <Route path="/complete-invite-by-registering" element={<AcceptInviteSignup />} />
               <Route path="/complete-valuer-user-registration-register" element={<AcceptValuerUserInviteSignup />} />
 

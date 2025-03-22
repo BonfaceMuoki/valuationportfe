@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, forwardRef } from "react";
 import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Controller,useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
+import {RSelect} from "../components/Component";
 
 import {
   Block,
@@ -21,7 +22,19 @@ import AuthFooter from "../pages/auth/AuthFooter";
 
 import { useRequestLenderCourtAccessMutation } from "../api/auth/inviteAccesorApiSlice";
 
+// Wrap RSelect in forwardRef
+const ForwardedRSelect = forwardRef((props, ref) => {
+  return <RSelect {...props} inputRef={ref} />;
+});
+
 const SigninAccesor = () => {
+
+
+  const lenderOptions = [
+    { value: "Bank", label: "Bank" },
+    { value: "Court", label: "Court" },
+    { value: "Microfinance", label: "Microfinance" },
+  ];
   const SITE_KEY = process.env.REACT_APP_reCAPTCHA_SITE_KEY;
   const captchaRef = useRef(null);
   //register form
@@ -31,8 +44,13 @@ const SigninAccesor = () => {
     login_email: yup.string().required("Login Email is required"),
     phone_number: yup.string().required("Contact Phone number is required"),
     institution_name: yup.string().required("Company Name is required"),
+    institution_type: yup.object().shape({
+      value: yup.string().required("Please specify institution type"),
+      label: yup.string().required(),
+    })
   });
   const {
+    control,
     register: registerAccesorRequestForm,
     isLoading: isSubmittingForm,
     reset: resetRequestForm,
@@ -46,14 +64,20 @@ const SigninAccesor = () => {
   const sendRequestForm = async (data) => {
     console.log(data);
     const token = await captchaRef.current.getValue();
-    const formDatareg = new FormData();
-    formDatareg.append("full_names", data.full_names);
-    formDatareg.append("institution_name", data.institution_name);
-    formDatareg.append("login_email", data.login_email);
-    formDatareg.append("phone_number", data.phone_number);
-    formDatareg.append("phone_number2", data.phone_number);
-    formDatareg.append("recaptcha_token", token);
-    const result = await submitAccessRequest(formDatareg);
+    
+    const requestData = {
+      institutionName: data.institution_name,
+      consumerContactPersonName: data.full_names,
+      consumerEmail: data.login_email,
+      consumerContactPersonPhone: data.phone_number,
+      consumerType: data.institution_type.value.toUpperCase(),
+      consumerLocationName: "San Francisco, CA", 
+      consumerLatitude: "37.7749", 
+      consumerLongitude: "-122.4194",
+      recaptcha_token: token
+    };
+
+    const result = await submitAccessRequest(requestData);
     if ("error" in result) {
     } else {
       resetRequestForm();
@@ -129,8 +153,29 @@ const SigninAccesor = () => {
                   className="form-control-lg form-control"
                 />
                 {requestvalueraccesserrors.institution_name?.message && (
-                  <span className="invalid">{requestvalueraccesserrors.institution_name?.message}</span>
+                  <span className="invalid" style={{color:"red"}} >{requestvalueraccesserrors.institution_name?.message}</span>
                 )}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="form-label-group">
+                <label className="form-label" htmlFor="default-01">
+                  Type Of Institution
+                </label>
+              </div>
+              <div className="form-control-wrap">
+              <Controller
+          name="institution_type"
+          control={control}
+          render={({ field }) => (
+            <ForwardedRSelect {...field} options={lenderOptions} />
+          )}
+        />
+
+                {requestvalueraccesserrors.institution_type?.message && (
+                  <span style={{color:"red", fontStyle:"italic", fontSize:"11px"}} >{requestvalueraccesserrors.institution_type?.message}</span>
+                )}  
               </div>
             </div>
 

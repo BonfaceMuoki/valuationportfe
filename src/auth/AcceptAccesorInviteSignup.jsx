@@ -104,13 +104,13 @@ function AcceptAccesorInviteSignup() {
   } = useForm({
     resolver: yupResolver(schema),
   });
-
+console.log(retrieved?.inviteDetails?.institutionName,"retrieved?.inviteDetails?.accessor_name");
   useEffect(() => {
     if (!loadingInviteDetails && retrieved) {
-      setInviteValue("institution_name", retrieved?.accessor_name);
-      setInviteValue("full_names", retrieved?.contact_person_name);
-      setInviteValue("login_email", retrieved?.invite_email);
-      setInviteValue("phone_number", retrieved?.contact_person_phone);
+      setInviteValue("institution_name", retrieved?.inviteDetails?.institutionName);
+      setInviteValue("full_names", retrieved?.inviteDetails?.consumerContactPersonName);
+      setInviteValue("login_email", retrieved?.inviteDetails?.consumerEmail);
+      setInviteValue("phone_number", retrieved?.inviteDetails?.consumerContactPersonPhone);
     }
   }, [retrieved, loadingInviteDetails, setInviteValue]);
 

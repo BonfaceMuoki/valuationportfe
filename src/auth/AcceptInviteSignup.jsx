@@ -101,17 +101,18 @@ const AcceptInviteSignup = () => {
   const navigate = useNavigate();
   const submitRegister = async (data) => {
     const formdata = new FormData();
-    formdata.append("company_name", data.company_name);
+    formdata.append("companyName", data.company_name);
     formdata.append("email", data.email);
-    formdata.append("organization_phone", data.phone_number);
-    formdata.append("vrb_number", data.vrb_number);
-    formdata.append("directors_vrb", data.vrb_number);
-    formdata.append("isk_number", data.isk_number);
+    formdata.append("organizationPhone", data.phone_number);
+    formdata.append("vrbNumber", data.vrb_number);
+    formdata.append("directorsvrb", data.vrb_number);
+    formdata.append("iskNumber", data.isk_number);
     formdata.append("password", data.password);
-    formdata.append("password_confirmation", data.confirm_password);
-    formdata.append("company_email", data.email);
-    formdata.append("register_as", "Report Uploader Admin");
-    formdata.append("full_name", data.full_name);
+    formdata.append("passwordConfirmation", data.confirm_password);
+    formdata.append("companyEmail", data.email);
+    formdata.append("registerAs", "Report Uploader Admin");
+    formdata.append("directorName", data.full_name);
+    formdata.append("officeLocation", data.latitude);
     formdata.append("latitude", data.latitude);
     formdata.append("longitude", data.longitude);
     const result = await registerValuer(formdata);

@@ -3,7 +3,7 @@ export const inviteAccesorApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({      
         getAccesorInviteDetails: builder.query({
             query: (invite_token) => ({
-                url: `/api/auth/retrieve-accessor-invite-details?invite_token=${invite_token}`,
+                url: `/api/auth/access-requests/consumer/get-invite-details?inviteToken=${invite_token}`,
                 method: 'GET',
                 headers: {
                     'Accept': 'Application/json'
@@ -42,7 +42,7 @@ export const inviteAccesorApiSlice = apiSlice.injectEndpoints({
             }),
         }),requestLenderCourtAccess: builder.mutation({
             query: (formData) => ({
-                url: `/api/auth/request-accesor-access`,
+                url: `/api/auth/consumer/request-access`,
                 method: 'POST',
                 body: formData,
                 headers: {
