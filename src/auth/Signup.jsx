@@ -141,18 +141,20 @@ const Signin = () => {
   const [requestValuerAccess, { isLOading: isSubmitting }] = useRequestUploaderAccessMutation();
   const sendRequestForm = async (data) => {
     const token = captchaRef.current.getValue();
-    const formData = new FormData();
-    formData.append("full_names", data.full_names);
-    formData.append("company_name", data.company_name);
-    formData.append("recaptcha_token", token);
-    formData.append("login_email", data.login_email);
-    formData.append("phone_number", data.phone_number);
-    formData.append("directors_isk_numer", data.directors_isk_numer);
-    formData.append("directors_vrb_numer", data.directors_vrb_numer);
-    formData.append("location_name", data.location_name);
-    formData.append('latitude', selectedLocation?.lat);
-    formData.append('longitude', selectedLocation?.lng);
-    const result = await requestValuerAccess(formData);
+
+    const jsonData = {
+      valuationFirmEmail: data.login_email,
+      valuationFirmPhone: data.phone_number,
+      iskNumber: data.directors_isk_numer,
+      vrbNumber: data.directors_vrb_numer,
+      valuationFirmName: data.company_name,
+      directorName: data.full_names,
+      valuationFirmLatitude: selectedLocation?.lat?.toString(),
+      valuationFirmLongitude: selectedLocation?.lng?.toString(),
+      valuationFirmLocation: data.location_name,
+      recaptcha_token: token
+    };
+    const result = await requestValuerAccess(jsonData);
     if ("error" in result) {
       if ("backendvalerrors" in result.error.data) {
         setBackendValErrors(result.error.data.backendvalerrors);
