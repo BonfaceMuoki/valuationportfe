@@ -155,9 +155,10 @@ const Signin = () => {
       recaptcha_token: token
     };
     const result = await requestValuerAccess(jsonData);
+    console.log('Result:', result);
     if ("error" in result) {
-      if ("backendvalerrors" in result.error.data) {
-        setBackendValErrors(result.error.data.backendvalerrors);
+      if ("errors" in result.error.data) {
+        setBackendValErrors(result.error.data.errors);
       }
     } else {
       resetRequestForm();
@@ -608,6 +609,9 @@ const Signin = () => {
                     {requestvalueraccesserrors.login_email?.message && (
                       <span className="invalid">{requestvalueraccesserrors.login_email?.message}</span>
                     )}
+                            {backendValErrors.valuationFirmEmail && (
+      <span className="invalid">{backendValErrors.valuationFirmEmail}</span>
+    )}
                   </div>
                 </div>
               </Col>
@@ -661,6 +665,9 @@ const Signin = () => {
                     {requestvalueraccesserrors.phone_number?.message && (
                       <span className="invalid">{requestvalueraccesserrors.phone_number?.message}</span>
                     )}
+                        {backendValErrors.valuationFirmPhone && (
+      <span className="invalid">{backendValErrors.valuationFirmPhone}</span>
+    )}
                   </div>
                 </div>
 
@@ -688,6 +695,9 @@ const Signin = () => {
                     {requestvalueraccesserrors.directors_vrb_numer?.message && (
                       <span className="invalid">{requestvalueraccesserrors.directors_vrb_numer?.message}</span>
                     )}
+                        {backendValErrors.vrbNumber && (
+      <span className="invalid">{backendValErrors.vrbNumber}</span>
+    )}
                   </div>
                 </div>
               </Col>
@@ -711,6 +721,9 @@ const Signin = () => {
                     {requestvalueraccesserrors.directors_isk_numer?.message && (
                       <span className="invalid">{requestvalueraccesserrors.directors_isk_numer?.message}</span>
                     )}
+                      {backendValErrors.iskNumber && (
+      <span className="invalid">{backendValErrors.iskNumber}</span>
+    )}
                   </div>
                 </div>
               </Col>
@@ -756,6 +769,9 @@ const Signin = () => {
                   {requestvalueraccesserrors.location_name?.message && (
                     <span className="invalid">{requestvalueraccesserrors.location_name?.message}</span>
                   )}
+                     {backendValErrors.valuationFirmLocation && (
+      <span className="invalid">{backendValErrors.valuationFirmLocation}</span>
+    )}
                 </div>
               </Col>
             </Row>
@@ -774,6 +790,9 @@ const Signin = () => {
                   {requestvalueraccesserrors.latitude?.message && (
                     <span className="invalid">{requestvalueraccesserrors.latitude?.message}</span>
                   )}
+                    {backendValErrors.valuationFirmLatitude && (
+      <span className="invalid">{backendValErrors.valuationFirmLatitude}</span>
+    )}
                 </div>
               </Col>
               <Col>
@@ -790,6 +809,9 @@ const Signin = () => {
                   {requestvalueraccesserrors.longitude?.message && (
                     <span className="invalid">{requestvalueraccesserrors.longitude?.message}</span>
                   )}
+                      {backendValErrors.valuationFirmLongitude && (
+      <span className="invalid">{backendValErrors.valuationFirmLongitude}</span>
+    )}
                 </div>
               </Col>
               {/* <Col xs="12" className="mt-2">
