@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, forwardRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import {Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -13,6 +13,7 @@ import {
   Button,
   Icon,
   PreviewCard,
+  RSelect,
 } from "../components/Component";
 import { useGetAccesorInviteDetailsQuery } from "../api/auth/inviteAccesorApiSlice";
 import { useRegisterAccesorMutation } from "../api/auth/inviteAccesorApiSlice";
@@ -31,7 +32,19 @@ const CloseButton = () => {
     </span>
   );
 };
+const ForwardedRSelect = forwardRef((props, ref) => {
+  return <RSelect {...props} inputRef={ref} />;
+});
+
 function AcceptAccesorInviteSignup() {
+
+  const lenderOptions = [
+    { value: "Bank", label: "Bank" },
+    { value: "Court", label: "Court" },
+    { value: "Microfinance", label: "Microfinance" },
+  ];
+
+
   const toastMessage = (message, type) => {
     if (type == "success") {
       toast.success(message, {
@@ -82,6 +95,10 @@ function AcceptAccesorInviteSignup() {
     institution_name: yup.string().required("Company Name is required"),
     full_names: yup.string().required("Your name is required"),
     phone_number: yup.string().required("Phone number is required"),
+    institution_type: yup.object().shape({
+      value: yup.string().required("Please specify institution type"),
+      label: yup.string().required(),
+    }),
     password: yup
       .string()
       .required("Please provide password")
@@ -96,6 +113,7 @@ function AcceptAccesorInviteSignup() {
   });
 
   const {
+    control,
     register: acceptInviteRegister,
     handleSubmit: handleSubmitRegisterValuer,
     setValue: setInviteValue,
@@ -111,26 +129,33 @@ console.log(retrieved?.inviteDetails?.institutionName,"retrieved?.inviteDetails?
       setInviteValue("full_names", retrieved?.inviteDetails?.consumerContactPersonName);
       setInviteValue("login_email", retrieved?.inviteDetails?.consumerEmail);
       setInviteValue("phone_number", retrieved?.inviteDetails?.consumerContactPersonPhone);
+      const institutionType = {
+        value: retrieved?.inviteDetails?.consumerType,
+        label: retrieved?.inviteDetails?.consumerType
+      };
+      setInviteValue("institution_type", institutionType);
     }
   }, [retrieved, loadingInviteDetails, setInviteValue]);
 
   const submitRegister = async (data) => {
-    const formdata = new FormData();
-    formdata.append("company_name", data.institution_name);
-    formdata.append("email", data.login_email);
-    formdata.append("organization_phone", data.phone_number);
-    formdata.append("password", data.password);
-    formdata.append("password_confirmation", data.confirm_password);
-    formdata.append("company_email", data.email);
-    formdata.append("register_as", "Report Accessor Admin");
-    formdata.append("full_name", data.full_name);
-    const result = await registerAccesor(formdata);
-    console.log(result);
+    const requestBody = {
+      consumerName: data.institution_name,
+      contactPersonName: data.full_names,
+      consumerEmail: data.login_email,
+      consumerPhone: data.phone_number,
+      consumerType: data.institution_type.value,
+      accessStatus: "ACTIVE",
+      inviteToken: params.get("token"),
+      password: data.password,
+      confirmPassword: data.confirm_password
+    };
+
+    const result = await registerAccesor(requestBody);
+    
     if ("error" in result) {
       toastMessage(result.error.data.message, "error");
       if ("backendvalerrors" in result.error.data) {
         setBackendValErrors(result.error.data.backendvalerrors);
-        console.log(backendValErrors["email"]);
       }
     } else {
       toastMessage(result.data.message, "success");
@@ -249,6 +274,28 @@ console.log(retrieved?.inviteDetails?.institutionName,"retrieved?.inviteDetails?
                   )}
                 </div>
               </div>
+
+            <div className="form-group">
+              <div className="form-label-group">
+                <label className="form-label" htmlFor="default-01">
+                  Type Of Institution
+                </label>
+              </div>
+              <div className="form-control-wrap">
+                <Controller
+                  name="institution_type"
+                  control={control}
+                  render={({ field }) => (
+                    <ForwardedRSelect {...field} options={lenderOptions} />
+                  )}
+                />
+
+                {acceptInviteerrors.institution_type?.message && (
+                  <span style={{ color: "red", fontStyle: "italic", fontSize: "11px" }} >{requestvalueraccesserrors.institution_type?.message}</span>
+                )}
+              </div>
+            </div>
+
               <Row className="mb-3">
                 <Col>
                   <div className="form-group">

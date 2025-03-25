@@ -46,7 +46,7 @@ export const inviteValuerApiSlice = apiSlice.injectEndpoints({
         }),
         registerUploader: builder.mutation({
             query: (formData) => ({
-                url: `/api/auth/register`,
+                url: `/api/auth/valuation-firm/complete-registration`,
                 method: 'POST',
                 body: formData,
                 headers: {

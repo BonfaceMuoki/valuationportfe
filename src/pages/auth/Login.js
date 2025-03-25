@@ -24,8 +24,8 @@ const Login = () => {
 
   const onFormSubmit = (formData) => {
     setLoading(true);
-    const loginName = "info@softnio.com";
-    const pass = "123456";
+    const loginName = "";
+    const pass = "";
     if (formData.name === loginName && formData.passcode === pass) {
       localStorage.setItem("accessToken", "token");
       setTimeout(() => {

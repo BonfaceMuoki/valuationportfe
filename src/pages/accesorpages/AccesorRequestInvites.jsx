@@ -19,25 +19,20 @@ import { DropdownMenu, DropdownToggle, UncontrolledDropdown, DropdownItem } from
 import { Link } from "react-router-dom";
 import { bulkActionOptions, findUpper } from "../../utils/Utils";
 import {
-  useApproveValuationFirmRequestMutation,
-  useGetValuationFirmRequestsQuery,
-  useRejectValuationFirmRequestMutation,
-} from "../../api/admin/valuationFirmRequestsSlice";
-import {
-  useArchiveUploaderRegistrationRequestMutation,
-  useRequestUploaderRegistrationStatusQuery,
-} from "../../api/auth/inviteValuerApiSlice";
+  useGetAccesorRequestsQuery,
+  useApproveAccesorRequestMutation,
+  useRejectAccesorRequestMutation,
+} from "../../api/admin/accesorRequestsSlliceApi";
+import { useArchiveAccesorRegistrationRequestMutation } from "../../api/auth/inviteAccesorApiSlice";
 
 import Swal from "sweetalert2";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-
-import CompanySummary from "../../components/CompanySummary";
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
-
+import CompanySummary from "../../components/CompanySummary";
 const CloseButton = () => {
   return (
     <span className="btn-trigger toast-close-button" role="button">
@@ -45,7 +40,7 @@ const CloseButton = () => {
     </span>
   );
 };
-const ValuerAccessInvites = () => {
+const AccesorRequestInvites = () => {
   const toastMessage = (message, type) => {
     if (type == "success") {
       toast.success(message, {
@@ -82,15 +77,16 @@ const ValuerAccessInvites = () => {
       });
     }
   };
-
   const [modalSm, setModalSm] = useState(false);
   const toggleSm = () => setModalSm(!modalSm);
 
   const [modalOpenCompanyDetails, setModaOpenCompanyDetails] = useState(false);
   const toggleOpenCompanyDetails = () => setModaOpenCompanyDetails(!modalOpenCompanyDetails);
 
+  const [currentItems, setcurrentItems] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage, setItemPerPage] = useState(3);
+  const [itemPerPage, setItemPerPage] = useState(10);
 
   const {
     data,
@@ -100,118 +96,85 @@ const ValuerAccessInvites = () => {
     isSuccess,
     isError,
     error,
-  } = useGetValuationFirmRequestsQuery({
-    currentPage: currentPage,
-    rowsPerPage: itemPerPage,
-    searchText: "",
-    orderColumn: "name",
-    sortOrder: "asc",
+  } = useGetAccesorRequestsQuery(
+    {
+      currentPage: currentPage,
+      rowsPerPage: itemPerPage,
+      searchText: "",
+      orderColumn: "name",
+      sortOrder: "asc",
+    }
+  );
+
+  // Add better debugging to understand the query state
+  console.log('Query State:', {
+    isLoading,
+    isFetching,
+    isSuccess,
+    isError,
+    error,
+    data
   });
 
+  const [acceptAccesorAccessRequest, { isLoading: sendingUploaderInvite }] = useApproveAccesorRequestMutation();
+  const [rejectValuationFirmRequest, { isloading: sendingReject }] = useRejectAccesorRequestMutation();
+
   useEffect(() => {
-    if (data?.requests) {
+    if (isSuccess && data) {
       setCurrentPage(data.requests.current_page);
       setItemPerPage(data.requests.per_page);
+      console.error('Data loaded successfully', data);
+      // setTableData(data);
+    } else if (isError) {
+      console.error('Error fetching accessor requests:', error);
+      // setTableData([]);
     }
-  }, [data]);
+  }, [isSuccess, isError, data, error]);
+
+
+
+ 
+
+  // const currentItems = ;
+  const frontendbaseurl = process.env.REACT_APP_FRONT_BASE_URL;
 
   // Change Page
-  const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  //actions
-  const [acceptValuationAccessRequest, { isLoading: sendingUploaderInvite }] = useApproveValuationFirmRequestMutation();
-  const [rejectValuationFirmRequest, { isloading: sendingReject }] = useRejectValuationFirmRequestMutation();
-  const acceptRequest = (firm) => {
-    console.log("Aproving");
+  const approveFirm = (firm) => {
     Swal.fire({
       title: "Are you sure?",
-      text: "You want to approve " + firm?.valuationFirmName + "?",
+      text: "You want to approve " + firm?.institution_name + "?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, Approve!",
+      confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        acceptAcceptingRegistartion(firm?.id);
+        acceptAcceptingRegistartion(firm);
       } else {
         Swal.fire("Approval!", "Approval Cancelled.", "warning");
       }
     });
   };
-  const frontendbaseurl = process.env.REACT_APP_FRONTEND_BASE_URL;
-  const acceptAcceptingRegistartion = async (data) => {
-    const formData = new FormData();
-    formData.append("request_id", data);
-    formData.append("login_url", `${frontendbaseurl}/complete-invite-by-login`);
-    formData.append("registration_url", `${frontendbaseurl}/complete-invite-by-registering`);
-    const result = await acceptValuationAccessRequest(formData);
-    if ("error" in result) {
-      if ("backendvalerrors" in result.error.data) {
-        // setBackendValErrors(result.error.data.backendvalerrors);
+  const declineFirm = (firm) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You want to decline " + firm?.institution_name + " request",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setActiveRequest(firm?.id);
+        setModalSm(true);
+        // submitDeclineRequest(firm);
+      } else {
+        Swal.fire("Decline!", "Decline Cancelled.", "success");
       }
-    } else {
-    }
-    refetchFirmRequests();
+    });
   };
-  const [activeRequest, setActiveRequest] = useState(0);
-  const [fullActiveRequest, setFullActiveRequest] = useState(null);
-  const declineRequest = (row) => {
-    setActiveRequest(row.id);
-    setFullActiveRequest(row);
-    setModalSm(true);
-    // rejectValuationFirmRequest();
-  };
-  const submitDeclineRequest = async (data) => {
-    console.log(data);
-    const formData = new FormData();
-    formData.append("invite", activeRequest);
-    formData.append("reason", data.reasonForRejection);
-    const result = await rejectValuationFirmRequest(formData);
-    if ("error" in result) {
-      if ("backendvalerrors" in result.error.data) {
-        // setBackendValErrors(result.error.data.backendvalerrors);
-      }
-    } else {
-      refetchFirmRequests();
-    }
 
-    // rejectValuationFirmRequest();
-  };
-  ///intialize invite form
-  ///intialize invite form
-  //intialize edit form
-  ///intialize edit form
-  const [regOrgDetails, setRegOrgDetails] = useState();
-  const { data: requestregdetails, isLoading: isLoadingRequestDetails } =
-    useRequestUploaderRegistrationStatusQuery(activeRequest);
-  useEffect(() => {
-    if (requestregdetails?.orgdetails) {
-      setRegOrgDetails(requestregdetails?.orgdetails);
-    }
-  }, [requestregdetails, isLoadingRequestDetails]);
-  const viewRegistrationStatus = async (row) => {
-    setActiveRequest(row.id);
-    setFullActiveRequest(row);
-    setModaOpenCompanyDetails(row);
-  };
-  const viewCompanyStatus = async (row) => {
-    setActiveRequest(row.id);
-  };
-  const [archiveRequestt] = useArchiveUploaderRegistrationRequestMutation();
-  const archiveRequest = async (row) => {
-    const formData = new FormData();
-    formData.append("invite", row.id);
-    const result = await archiveRequestt(formData);
-    if ("error" in result) {
-      toastMessage(result.error.data.message, "error");
-      if ("backendvalerrors" in result.error.data) {
-      }
-    } else {
-      refetchFirmRequests();
-    }
-  };
-  //actions
+  //process decline form
   const schema = yup.object().shape({
     reasonForRejection: yup.string().required("Reason is required"),
   });
@@ -222,8 +185,71 @@ const ValuerAccessInvites = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  // const [submitRequestDecline,]
 
-  if (data?.requests?.data) {
+  const acceptAcceptingRegistartion = async (data) => {
+    const jsonData = {
+      requestId:  data?.id
+  };
+    const result = await acceptAccesorAccessRequest(jsonData);
+    if ("error" in result) {
+      if ("backendvalerrors" in result.error.data) {
+        setBackendValErrors(result.error.data.backendvalerrors);
+        toastMessage(result?.error?.data?.message, "error");
+      }
+    } else {
+      toastMessage(result?.data?.message, "success");
+      refetchFirmRequests();
+    }
+ 
+    refetchFirmRequests();
+  };
+  const [activeRequest, setActiveRequest] = useState(0);
+  const [fullActiveRequest, setFullActiveRequest] = useState(null);
+
+  const submitDeclineRequest = async (data) => {
+    console.log(data);
+    const formData = new FormData();
+    formData.append("invite", activeRequest);
+    formData.append("reason", data.reasonForRejection);
+    const result = await rejectValuationFirmRequest(formData);
+    if ("error" in result) {
+      Swal.fire("Decline!", result.error.data.message, "warning");
+      if ("backendvalerrors" in result.error.data) {
+      }
+    } else {
+      toastMessage(result.data.message, "success");
+      refetchFirmRequests();
+    }
+
+    // rejectValuationFirmRequest();
+  };
+
+  const [archiveRequestt] = useArchiveAccesorRegistrationRequestMutation();
+  const archiveRequest = async (row) => {
+    const formData = new FormData();
+    formData.append("invite", row.id);
+    const result = await archiveRequestt(formData);
+    if ("error" in result) {
+      if ("backendvalerrors" in result.error.data) {
+        // setBackendValErrors(result.error.data.backendvalerrors);
+      }
+    } else {
+      refetchFirmRequests();
+    }
+  };
+  const viewCompanyStatus = async (row) => {
+    toggleOpenCompanyDetails();
+    setActiveRequest(row.id);
+    setFullActiveRequest(row);
+  };
+  const viewRegistrationStatus = async (row) => {
+    setFullActiveRequest(row);
+    setActiveRequest(row.id);
+    setModaOpenCompanyDetails(true);
+  };
+  if (data?.requests?.data?.length > 0) {
+  
     return (
       <PreviewCard>
         {/* open modal decline */}
@@ -239,7 +265,7 @@ const ValuerAccessInvites = () => {
             Company Information
           </ModalHeader>
           <ModalBody>
-            <CompanySummary item={fullActiveRequest} companytypes="valuer" />
+            <CompanySummary item={fullActiveRequest} companytypes="Accessor" />
           </ModalBody>
           <ModalFooter className="bg-light"></ModalFooter>
         </Modal>
@@ -277,172 +303,169 @@ const ValuerAccessInvites = () => {
           <ModalFooter className="bg-light"></ModalFooter>
         </Modal>
         {/* close modal for decline */}
-
         <BlockHead size="lg" wide="sm">
-          <BlockHeadContent>Valuer Access Requests.</BlockHeadContent>
+          <BlockHeadContent>Accesors Access Requests.</BlockHeadContent>
         </BlockHead>
+        {/* <ReactDataTable data={DataTableData} columns={dataTableColumns} expandableRows pagination /> */}
         <DataTable className="card-stretch">
+          
           <DataTableBody>
             <DataTableHead>
               <DataTableRow>
                 <span className="sub-text">Company Name</span>
               </DataTableRow>
               <DataTableRow size="mb">
-                <span className="sub-text">ISK verification Details </span>
+                <span className="sub-text">Contact Person </span>
+              </DataTableRow>
+              <DataTableRow>
+                <span className="sub-text">ISK Info</span>
               </DataTableRow>
               <DataTableRow className="nk-tb-col-tools text-end">
                 <span className="sub-text">Action</span>
               </DataTableRow>
             </DataTableHead>
             {/*Head*/}
-            {data.requests.data.map((item, index) => {
-              return (
-                <DataTableItem key={`valuer-access-reqs-${item.id}`}>
-                  <DataTableRow>
-                    {/* <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}> */}
-                      <div className="user-card">
-                        <UserAvatar
-                          theme={item.avatarBg}
-                          text={findUpper(
-                            item.valuationFirmName != null && item.valuationFirmName != undefined
-                              ? item.valuationFirmName
-                              : ""
-                          )}
-                          image=""
-                        ></UserAvatar>
-                        <div className="user-info">
-                          <span className="tb-lead">
-                            {item?.valuationFirmName}{" "}
-                            <span
-                              className={`dot dot-${
-                                item.status === "Active"
-                                  ? "success"
-                                  : item?.status === "Pending"
-                                  ? "warning"
-                                  : "danger"
-                              } d-md-none ms-1`}
-                            ></span>
-                          </span>
-                          <span>{item?.inviteEmail}</span>
+            {data?.requests?.data != undefined &&
+              data?.requests?.data != null &&
+              data?.requests?.data.map((item, index) => {
+                return (
+                  <DataTableItem key={`lenders-invites${item.id}`}>
+                    <DataTableRow>
+                      <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}>
+                        <div className="user-card">
+                          <UserAvatar
+                            theme={item.avatarBg}
+                            text={findUpper(
+                              item.consumerName != null && item.consumerName != undefined
+                                ? item.consumerName
+                                : ""
+                            )}
+                            image=""
+                          ></UserAvatar>
+                          <div className="user-info">
+                            <span className="tb-lead">
+                              {item?.consumerName}{" "}
+                              <span
+                                className={`dot dot-${
+                                  item.approvalStatus === "ACTIVE"
+                                    ? "success"
+                                    : item?.status === "PENDING"
+                                    ? "warning"
+                                    : "danger"
+                                } d-md-none ms-1`}
+                              ></span>
+                            </span>
+                            <span>{item?.consumerEmail}</span>
+                          </div>
                         </div>
-                      </div>
-                    {/* </Link> */}
-                  </DataTableRow>
-                  <DataTableRow>
-                    <span className="tb-amount">
-                      <span className="tb-lead">
-                        {" "}
-                        <b>Dir Name</b> &nbsp;&nbsp;&nbsp; <span>{item?.directorName}</span>{" "}
+                      </Link>
+                    </DataTableRow>
+                    <DataTableRow>
+                      <span className="tb-amount">
+                        {item?.consumerContactPersonName} <span className="currency"></span>
                       </span>
-                    </span>
-                    <span className="tb-amount">
-                      <span className="tb-lead">
-                        {" "}
-                        <b>ISK Number</b>:&nbsp;&nbsp;&nbsp; <span>{item?.iskNumber}</span>{" "}
+                      <span className="tb-amount">
+                        {item?.consumerContactPersonPhone} <span className="currency"></span>
                       </span>
-                    </span>
-                    <span className="tb-amount">
-                      <span className="tb-lead">
-                        {" "}
-                        <b>VRB Number</b>&nbsp;&nbsp;&nbsp; <span>{item?.vrbNumber}</span>{" "}
-                      </span>
-                    </span>
-                  </DataTableRow>
-                  <DataTableRow className="nk-tb-col-tools">
-                    <ul className="nk-tb-actions gx-1">
-                      <li>
-                        <UncontrolledDropdown>
-                          <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
-                            <Icon name="more-h"></Icon>
-                          </DropdownToggle>
-                          <DropdownMenu end>
-                            <ul className="link-list-opt no-bdr">
-                              {item?.approvalStatus === "PENDING" && (
-                                <React.Fragment>
-                                  <li onClick={() => acceptRequest(item)}>
-                                    <DropdownItem
-                                      tag="a"
-                                      href="#edit"
-                                      onClick={(ev) => {
-                                        ev.preventDefault();
-                                      }}
-                                    >
-                                      <Icon name="check"></Icon>
-                                      <span>Approve</span>
-                                    </DropdownItem>
-                                  </li>
-                                  <li className="divider"></li>
-                                  <li onClick={() => declineRequest(item)}>
-                                    <DropdownItem
-                                      tag="a"
-                                      href="#suspend"
-                                      onClick={(ev) => {
-                                        ev.preventDefault();
-                                      }}
-                                    >
-                                      <Icon name="cross"></Icon>
-                                      <span>Decline</span>
-                                    </DropdownItem>
-                                  </li>
-                                </React.Fragment>
-                              )}
-                              {item?.status === "Approved" && (
-                                <React.Fragment>
-                                  <li onClick={() => viewRegistrationStatus(item)}>
-                                    <DropdownItem
-                                      tag="a"
-                                      href="#edit"
-                                      onClick={(ev) => {
-                                        ev.preventDefault();
-                                      }}
-                                    >
-                                      <Icon name="check"></Icon>
-                                      <span>View Registration Status</span>
-                                    </DropdownItem>
-                                  </li>
-                                </React.Fragment>
-                              )}
-                              {item?.status === "Rejected" && (
-                                <React.Fragment>
-                                  <li onClick={() => archiveRequest(item)}>
-                                    <DropdownItem
-                                      tag="a"
-                                      href="#edit"
-                                      onClick={(ev) => {
-                                        ev.preventDefault();
-                                      }}
-                                    >
-                                      <Icon name="check"></Icon>
-                                      <span>Archive Request</span>
-                                    </DropdownItem>
-                                  </li>
-                                </React.Fragment>
-                              )}
-                              {item?.status === "Registered" && (
-                                <React.Fragment>
-                                  <li onClick={() => viewRegistrationStatus(item)}>
-                                    <DropdownItem
-                                      tag="a"
-                                      href="#edit"
-                                      onClick={(ev) => {
-                                        ev.preventDefault();
-                                      }}
-                                    >
-                                      <Icon name="check"></Icon>
-                                      <span>View Company Details</span>
-                                    </DropdownItem>
-                                  </li>
-                                </React.Fragment>
-                              )}
-                            </ul>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </li>
-                    </ul>
-                  </DataTableRow>
-                </DataTableItem>
-              );
-            })}
+                    </DataTableRow>
+                    <DataTableRow size="md">
+                      <span>Type: {item?.consumerType}</span>
+                    </DataTableRow>
+                    <DataTableRow className="nk-tb-col-tools">
+                      <ul className="nk-tb-actions gx-1">
+                        <li>
+                          <UncontrolledDropdown>
+                            <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
+                              <Icon name="more-h"></Icon>
+                            </DropdownToggle>
+                            <DropdownMenu end>
+                              <ul className="link-list-opt no-bdr">
+                                {item?.approvalStatus === "PENDING" && (
+                                  <React.Fragment>
+                                    <li onClick={() => approveFirm(item)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#edit"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="check"></Icon>
+                                        <span>Approve</span>
+                                      </DropdownItem>
+                                    </li>
+                                    <li className="divider"></li>
+                                    <li onClick={() => declineFirm(item)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#suspend"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="cross"></Icon>
+                                        <span>Decline</span>
+                                      </DropdownItem>
+                                    </li>
+                                  </React.Fragment>
+                                )}
+                                {item?.status === "Approved" && (
+                                  <React.Fragment>
+                                    <li onClick={() => viewRegistrationStatus(item)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#edit"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="check"></Icon>
+                                        <span>View Registration Status</span>
+                                      </DropdownItem>
+                                    </li>
+                                  </React.Fragment>
+                                )}
+                                {item?.status === "Rejected" && (
+                                  <React.Fragment>
+                                    <li onClick={() => archiveRequest(item)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#edit"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="check"></Icon>
+                                        <span>Archive Request</span>
+                                      </DropdownItem>
+                                    </li>
+                                  </React.Fragment>
+                                )}
+                                {item?.status === "Registered" && (
+                                  <React.Fragment>
+                                    <li onClick={() => viewRegistrationStatus(item)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#edit"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="check"></Icon>
+                                        <span>View Company Details</span>
+                                      </DropdownItem>
+                                    </li>
+                                  </React.Fragment>
+                                )}
+                              </ul>
+                            </DropdownMenu>
+                          </UncontrolledDropdown>
+                        </li>
+                      </ul>
+                    </DataTableRow>
+                  </DataTableItem>
+                );
+              })}
           </DataTableBody>
           <div className="card-inner">
             {data.requests.data.length > 0 ? (
@@ -464,4 +487,4 @@ const ValuerAccessInvites = () => {
   } else {
   }
 };
-export default ValuerAccessInvites;
+export default AccesorRequestInvites;

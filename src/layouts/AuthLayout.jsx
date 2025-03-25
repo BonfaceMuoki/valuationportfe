@@ -14,7 +14,7 @@ const AuthLayout = () => {
       <Block className="nk-block-middle-auth nk-auth-body  wide-xs"   >
         <div className="brand-logo pb-4 text-center">
           <Link to={process.env.PUBLIC_URL + "/"} className="logo-link">
-           <h5>ISK VDS</h5>
+           <h5>VALUATIONPORT</h5>
           </Link>
         </div>
         <Outlet/>

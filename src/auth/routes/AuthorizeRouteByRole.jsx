@@ -4,18 +4,12 @@ import { selectCurrentPermissions, selectCurrentRoles } from "../../featuers/aut
 
 function AuthorizeRouteByRole({ checkrole }) {
     const location = useLocation();
-    console.log(checkrole, "checkrolecheckrole");
-
     const roles = useSelector(selectCurrentRoles);
-    console.log(roles, "roles");
-
-    // Check if any permission in checkpermission array exists in user's permissions
     const hasRole = Array.isArray(checkrole)
-        ? checkrole.some(cp => roles.find(p => p.name === cp))
+        ? checkrole.some(cp => roles.find(p => p === cp))
         : roles.find(p => p.name === checkrole);
     return (
         hasRole ? <Outlet /> : <Navigate to="/unauthorized" state={{ from: location }} replace />
     );
 }
-
 export default AuthorizeRouteByRole;

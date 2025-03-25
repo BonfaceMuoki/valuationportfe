@@ -3,7 +3,7 @@ export const accesorRequestsSlliceApi = apiSlice.injectEndpoints({
     endpoints: builder => ({
         getAccesorRequests: builder.query({
             query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => ({
-                url: `/api/admin/access-requests/valuers?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
+                url: `/api/admin/access-requests/consumers?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
                 method: 'GET',
                 headers: {
                     'Accept': 'Application/json'
@@ -13,7 +13,7 @@ export const accesorRequestsSlliceApi = apiSlice.injectEndpoints({
         }),
         approveAccesorRequest: builder.mutation({
             query: (formdata) => ({
-                url: `/api/admin/accept-accesor-access-request`,
+                url: `/api/admin/access-requests/consumers/approve`,
                 method: 'POST',
                 body: formdata,
                 headers: {

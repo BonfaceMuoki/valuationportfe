@@ -9,6 +9,7 @@ import * as yup from "yup";
 import { useLoginMutation } from "../api/auth/authApiSlice";
 import { setCredentials } from "../featuers/authSlice";
 import ReCAPTCHA from "react-google-recaptcha";
+import { toast } from "react-toastify";
 
 import {
   Block,
@@ -27,7 +28,22 @@ import AuthFooter from "../pages/auth/AuthFooter";
 const Login = () => {
   const navigateto = useNavigate();
   const [passState, setPassState] = useState(false);
-  const toastMessage = (message, type) => {};
+  const toastMessage = (message, type) => {
+  
+    switch (type) {
+      case "error":
+        toast.error(message);
+        break;
+      case "success":
+        toast.success(message);
+        break;
+      case "warning":
+        toast.warning(message);
+        break;
+      default:
+        toast.info(message);
+    }
+  };
   const SITE_KEY = process.env.REACT_APP_reCAPTCHA_SITE_KEY;
   const SECRET_KEY = process.env.REACT_APP_reCAPTCHA_SECRET_KEY;
   const captchaRef = useRef(null);
@@ -56,11 +72,11 @@ const Login = () => {
     let password = data.password;
     let recaptcha_token = captchaRef.current.getValue();
     const userData = await login({ email, password, recaptcha_token });
+    console.log(userData);
     dispatch(setCredentials({ ...userData.data, email }));
     if ("error" in userData) {
-      toastMessage(userData.error.data.message, "error");
-      if ("backendvalerrors" in userData.error.data) {
-      }
+    
+      toastMessage(userData.error.data.error, "error");
     } else {
       navigateto("/");
     }

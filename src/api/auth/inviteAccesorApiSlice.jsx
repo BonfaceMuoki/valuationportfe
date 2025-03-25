@@ -23,7 +23,7 @@ export const inviteAccesorApiSlice = apiSlice.injectEndpoints({
         }),
         registerAccesor: builder.mutation({
             query: (formData) => ({
-                url: `/api/auth/register-accesor`,
+                url: `/api/auth/consumer-org/complete-registration`,
                 method: 'POST',
                 body: formData,
                 headers: {

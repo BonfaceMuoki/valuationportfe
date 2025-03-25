@@ -141,11 +141,10 @@ const ValuerAccessInvites = () => {
   };
   const frontendbaseurl = process.env.REACT_APP_FRONTEND_BASE_URL;
   const acceptAcceptingRegistartion = async (data) => {
-    const formData = new FormData();
-    formData.append("request_id", data);
-    formData.append("login_url", `${frontendbaseurl}/complete-invite-by-login`);
-    formData.append("registration_url", `${frontendbaseurl}/complete-invite-by-registering`);
-    const result = await acceptValuationAccessRequest(formData);
+    const jsonData = {
+      requestId: data
+  };
+    const result = await acceptValuationAccessRequest(jsonData);
     if ("error" in result) {
       if ("backendvalerrors" in result.error.data) {
         // setBackendValErrors(result.error.data.backendvalerrors);
@@ -283,15 +282,15 @@ const ValuerAccessInvites = () => {
         </BlockHead>
         <DataTable className="card-stretch">
           <DataTableBody>
-            <DataTableHead>
-              <DataTableRow>
-                <span className="sub-text">Company Name</span>
+            <DataTableHead >
+              <DataTableRow >
+                <span className="sub-text" style={{ minHeight: "50px", display: "flex", alignItems: "center" }}>Company Name</span>
               </DataTableRow>
-              <DataTableRow size="mb">
-                <span className="sub-text">ISK verification Details </span>
+              <DataTableRow  >
+                <span className="sub-text" style={{ minHeight: "50px", display: "flex", alignItems: "center" }}>ISK verification Details </span>
               </DataTableRow>
-              <DataTableRow className="nk-tb-col-tools text-end">
-                <span className="sub-text">Action</span>
+              <DataTableRow className="nk-tb-col-tools text-end" style={{ minHeight: "400px" }}>
+                <span className="sub-text" style={{ minHeight: "50px", display: "flex", alignItems: "center" }}>Action</span>
               </DataTableRow>
             </DataTableHead>
             {/*Head*/}

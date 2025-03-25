@@ -23,7 +23,7 @@ export const valuationFirmRequestsSlliceApi = apiSlice.injectEndpoints({
         }),
         approveValuationFirmRequest: builder.mutation({
             query: (formdata) => ({
-                url: `/api/admin/accept-valuation-access-request`,
+                url: `/api/admin/access-requests/valuers/approve`,
                 method: 'POST',
                 body: formdata,
                 headers: {

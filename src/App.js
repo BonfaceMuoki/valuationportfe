@@ -57,7 +57,7 @@ const App = () => {
                   element={
                     <AuthorizeRoute
                       checkpermission={[
-                        "view super admin dashbaord",
+                        "View Admin Dashboard",
                         "view valuation firm dashboard",
                         "view accesors dashboard",
                       ]}
