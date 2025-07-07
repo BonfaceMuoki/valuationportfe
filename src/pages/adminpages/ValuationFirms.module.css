@@ -1,0 +1,9 @@
+.dropdownMenuFix {
+    z-index: 2000 !important;
+    position: absolute;
+  }
+  
+  .cardInnerFix {
+    overflow: visible !important;
+  }
+  

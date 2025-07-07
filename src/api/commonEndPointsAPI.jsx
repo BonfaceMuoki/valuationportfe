@@ -19,10 +19,24 @@ export const CommonEnpointsApi = apiSlice.injectEndpoints({
       refetchOnFocus: true,
     }),
     getValuersList: builder.query({
-      query: () => `/api/commons/get-uploaders-list`,
-      skipCache: true,
-      keepUnusedDataFor: 5,
-      refetchOnFocus: true,
+      query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => {
+        console.log("🔍 getValuersList params:", {
+          currentPage,
+          rowsPerPage,
+          searchText,
+          orderColumn,
+          sortOrder,
+        });
+        alert(currentPage, rowsPerPage, searchText, orderColumn, sortOrder)
+    
+        return {
+          url: `/api/commons/get-valuation-firms?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
+          method: "GET",
+          headers: {
+            Accept: "Application/json",
+          },
+        };
+      },
     }),
     getPropertyTypeList: builder.query({
       query: () => `/api/commons/get-all-propertytypes`,

@@ -270,15 +270,15 @@ const AccesorReports = ({ showsearchbar = true }) => {
     isError: errorLodingAccesors,
     error: loadingAccesorError,
   } = useGetValuersListQuery();
-  // console.log("Accesors List");
-  console.log(accesorslist, "Acessd ");
+  console.log("Accesors List");
+  console.log(accesorslist, "Accesors ");
   const [existingAccessors, setExistingAccessors] = useState();
   useEffect(() => {
-    if (accesorslist?.data != undefined) {
+    if (accesorslist?.data?.firms != undefined) {
       const restructuredData = accesorslist?.data.map(({ id, organization_name }) => ({
         value: id,
-        label: organization_name,
-        name: organization_name,
+        label: valuationFirmName,
+        name: valuationFirmName,
       }));
       setExistingAccessors(restructuredData);
     }

@@ -32,6 +32,7 @@ import AccesorFirms from "./pages/adminpages/AccesorFirms";
 import ValuerAccessInvites from "./pages/valuerspages/ValuerAccessInvites";
 import AccesorRequestInvites from "./pages/accesorpages/AccesorRequestInvites";
 import OrgUsersList from "./pages/adminpages/OrgUsersList";
+import './App.css'
 
 const App = () => {
   return (

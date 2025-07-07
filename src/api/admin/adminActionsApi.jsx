@@ -23,7 +23,7 @@ export const retrieveAdminDashboardSliceApi = apiSlice.injectEndpoints({
     }),
     getValuationFirmsList: builder.query({
       query: ({ currentPage, rowsPerPage, searchText, orderColumn, sortOrder }) => ({
-        url: `/api/commons/get-uploaders-list?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
+        url: `/api/commons/get-valuation-firms?page=${currentPage}&no_records=${rowsPerPage}&search=${searchText}&orderby=${orderColumn}&sortOrder=${sortOrder}`,
         method: "GET",
         headers: {
           Accept: "Application/json",

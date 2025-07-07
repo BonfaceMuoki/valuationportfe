@@ -276,10 +276,14 @@ const ValuerAccessInvites = () => {
           <ModalFooter className="bg-light"></ModalFooter>
         </Modal>
         {/* close modal for decline */}
-
-        <BlockHead size="lg" wide="sm">
-          <BlockHeadContent>Valuer Access Requests.</BlockHeadContent>
-        </BlockHead>
+       
+        <BlockHeadContent>
+          <h4 className="mb-1 text-uppercase fw-bold text-primary">
+          Valuer Access Requests.
+          </h4>
+          <p className="text-muted small">Manage registration requests submitted by accessor firms</p>
+        </BlockHeadContent>
+ 
         <DataTable className="card-stretch">
           <DataTableBody>
             <DataTableHead >
